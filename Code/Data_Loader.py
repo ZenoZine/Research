@@ -89,7 +89,8 @@ class pascalVOCLoader(data.Dataset):
         
         im = self.image_tf(im)
         lbl = self.lbl_tf(lbl)
-        if self.split == 'train':
+        '''
+        if self.split == 'train' and augmentations is not None:
             lbl = torch.unsqueeze(lbl, 0)
             #lbl = lbl.view([1, 512, 512, 1])
             if random.randint(0, 2) > 0:
@@ -100,4 +101,5 @@ class pascalVOCLoader(data.Dataset):
                 im = TF.rotate(im, angle)
                 lbl = TF.rotate(lbl, angle)
             lbl = torch.squeeze(lbl, 0)
+        '''
         return im, lbl
