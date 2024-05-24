@@ -33,6 +33,7 @@ from datetime import datetime
 from data_loader import pascalVOCLoader
 
 # Parameters (Is there a reason why the parameters are defined outside?)
+batch_size = 8
 params = {'batch_size': batch_size , 'shuffle': True, 'num_workers': 1}
 
 # This part I want to analyze later
@@ -43,9 +44,10 @@ training_set = pascalVOCLoader(partition['train'] , labels)
 training_gen = DataLoader(training_set , **params)
 
 # Defining the network, optimizer, and loss
-model = deeplabv3_resnet50(pretrained: False, progress: False)
+model = deeplabv3_resnet50(pretrained=False, progress=False)
 optimizer = optim.SGD(model.parameters() , lr = 0.001 , momentum = 0.9)
-criterion = nn.CrossEntropyLoss(weight = weights, ignore_index = 255)
+# We will use weights later
+criterion = nn.CrossEntropyLoss(ignore_index = 255)
 
 #Looping
 max_epochs = 10
@@ -71,15 +73,16 @@ for epoch in range(max_epochs):
 
     # Weights are updated
     optimizer.step()
-    train_oss += loss.item()
+    train_loss += loss.item()
 
-# This part I just copied
-print('[Epoch: %d]' % (epoch))
-    	print('Train loss: %.3f' % (train_loss / (i + 1)))
-        # svae loss of every epoch in the summary writer object
-        writer.add_scalar('training loss',
-                            train_loss / (i + 1),
-                            epoch)
+  # This part I just copied
+  #Prints out loss after every epoch and saves the loss in SummaryWriter
+  ## FIXME: You will get an error due to use of tab and space. 
+  ## Make sure the next 3 lines have same indentation as line 64 (for i, sample in ....)
+  print('[Epoch: %d]' % (epoch))
+  print('Train loss: %.3f' % (train_loss / (i + 1)))
+  # svae loss of every epoch in the summary writer object
+  writer.add_scalar('training loss', train_loss / (i + 1), epoch)
  	
-	# save model weights  
-    save(model.state_dict(), f'{base_dir}/trained_models/final.pt-'+timestamp)
+# save model weights  
+save(model.state_dict(), f'{base_dir}/trained_models/final.pt-'+timestamp)
