@@ -25,7 +25,9 @@ import ssl
 
 from datetime import datetime
 
-from data_loader import pascalVOCLoader
+from DataLoader import pascalVOCLoader
+
+base_dir = "/home/josh_reed/Desktop/Reed_Project/Research/VOCdevkit/VOC2012"
 
 test_set = pascalVOCLoader(base_dir, 'test')
 test_loader = DataLoader(test_set, batch_size=1,
@@ -33,7 +35,7 @@ test_loader = DataLoader(test_set, batch_size=1,
    # Define netwoirk, optimizer and loss
 model = deeplabv3_resnet50(pretrained=False, progress=False)
     
-metric = JaccardIndex(num_classes=21, ignore_index=0, reduction='none')
+metric = JaccardIndex(task="multiclass", num_classes=21, ignore_index=0)
 model.load_state_dict(load(f'{base_dir}/trained_models/final.pt-1649029005.91684'))
 
 model.eval()
