@@ -8,9 +8,12 @@ import os
 import scipy.misc
 import numpy as np
 import sys
+import torch
 from tqdm import tqdm
+import torchvision.transforms.functional as TF
 from torch.nn import BCEWithLogitsLoss
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms
 from torchvision import models
 from torchvision.models.segmentation import deeplabv3_resnet50
 from torchmetrics import JaccardIndex
@@ -25,13 +28,15 @@ from torch import FloatTensor
 from torch import save
 from torch import load
 from torch import from_numpy
+from PIL import Image
 import matplotlib.pyplot as plt
 import ssl
+import random
 
 from datetime import datetime
 
 # from DataLoader import pascalVOCLoader
-class pascalVOCLoader(data.Dataset):
+class pascalVOCLoader(Dataset):
     """
     Data loader for the Pascal VOC semantic segmentation dataset.
     """
@@ -142,7 +147,7 @@ optimizer = optim.SGD(model.parameters() , lr = 0.001 , momentum = 0.9)
 criterion = nn.CrossEntropyLoss(ignore_index = 255)
 
 #Looping
-max_epochs = 100
+max_epochs = 1
 
 for epoch in range(max_epochs):
   train_loss = 0.0
