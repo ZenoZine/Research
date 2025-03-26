@@ -129,7 +129,7 @@ params = {'batch_size': batch_size , 'shuffle': True}
 timestamp = str(datetime.now().timestamp())
 writer = SummaryWriter('runs/VOCSegment.' +timestamp)
 
-base_dir = '/Users/orida/Desktop/Research/Data/VOCdevkit/VOC2012'
+base_dir = '/home/josh_reed/Desktop/Reed_Project/Research/VOCdevkit/VOC2012'
 
 # Defining the Dataloader
 training_set = pascalVOCLoader(base_dir , 'train')
@@ -142,7 +142,7 @@ optimizer = optim.SGD(model.parameters() , lr = 0.001 , momentum = 0.9)
 criterion = nn.CrossEntropyLoss(ignore_index = 255)
 
 #Looping
-max_epochs = 1
+max_epochs = 100
 
 for epoch in range(max_epochs):
   train_loss = 0.0
