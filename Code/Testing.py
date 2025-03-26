@@ -31,7 +31,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 base_dir = "/home/josh_reed/Desktop/Reed_Project/Research/VOCdevkit/VOC2012"
 
-test_set = pascalVOCLoader(base_dir, 'val')  # Use 'val' instead of 'test'
+test_set = pascalVOCLoader(base_dir, 'val')
 test_loader = DataLoader(test_set, batch_size=4, shuffle=False, num_workers=2, pin_memory=True)
 
 # Move model to GPU
