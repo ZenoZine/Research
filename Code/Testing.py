@@ -27,6 +27,8 @@ from datetime import datetime
 
 from DataLoader import pascalVOCLoader
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 base_dir = "/home/josh_reed/Desktop/Reed_Project/Research/VOCdevkit/VOC2012"
 
 test_set = pascalVOCLoader(base_dir, 'test')
@@ -34,6 +36,7 @@ test_loader = DataLoader(test_set, batch_size=1,
                 shuffle=False, num_workers=1)
    # Define netwoirk, optimizer and loss
 model = deeplabv3_resnet50(pretrained=False, progress=False)
+model.to(device)
     
 metric = JaccardIndex(task="multiclass", num_classes=21, ignore_index=0)
 model.load_state_dict(load(f'{base_dir}/trained_models/final.pt-1649029005.91684'))
