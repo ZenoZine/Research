@@ -1,0 +1,6 @@
+Results for model: final1741801853.694394.pt
+
+Per-class IoU: 0.6041778326034546
+Mean IoU: 0.6041778326034546
+Total Inference Time: 28.512324571609497
+Average Time per Batch: 0.07854634868211982
