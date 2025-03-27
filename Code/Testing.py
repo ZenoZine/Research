@@ -4,6 +4,7 @@ import scipy.misc
 import numpy as np
 import sys
 from tqdm import tqdm
+import torch
 from torch.nn import BCEWithLogitsLoss
 from torch.utils.data import DataLoader
 from torchvision import models
@@ -22,15 +23,19 @@ from torch import load
 from torch import from_numpy
 import matplotlib.pyplot as plt
 import ssl
+import time
 
 from datetime import datetime
 
 from DataLoader import pascalVOCLoader
 
+parser = argparse.ArgumentParser(description="Test a trained DeepLabV3 model on Pascal VOC dataset.")
+parser.add_argument("--model-name", type=str, required=True, help="Path to the trained model .pt file")
+args = parser.parse_args()
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 base_dir = "/home/josh_reed/Desktop/Reed_Project/Research/VOCdevkit/VOC2012"
-
 test_set = pascalVOCLoader(base_dir, 'val')
 test_loader = DataLoader(test_set, batch_size=4, shuffle=False, num_workers=2, pin_memory=True)
 
@@ -39,7 +44,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 model = deeplabv3_resnet50(pretrained=False, progress=False).to(device)
-model.load_state_dict(load(f'{base_dir}/trained_models/final.pt-1649029005.91684', map_location=device))
+model.load_state_dict(load(f'{base_dir}/trained_models/{args.model_name}', map_location=device))
 
 # Move metric to GPU
 metric = JaccardIndex(task="multiclass", num_classes=21, ignore_index=0).to(device)
