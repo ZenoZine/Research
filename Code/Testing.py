@@ -98,3 +98,27 @@ miou = np.mean(Per_class_IoU)
 print("\nTest set results:")
 print("Per-class IoU:", Per_class_IoU)
 print("Mean IoU:", miou)
+
+# Save the results to a new file
+results_dir = "test results"
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
+results = {
+    "Per-class IoU": Per_class_IoU,
+    "Mean IoU": miou,
+    "Total Inference Time": total_time,
+    "Average Time per Batch": avg_batch_time
+}
+
+# Set up the timestamps
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+results_file = os.path.join(results_dir, f"results_{timestamp}.txt")
+
+# Save the results to the file
+with open(results_file, "w") as f:
+    f.write(f"Results for model: {args.model_name}\n\n")
+    for key, value in results.items():
+        f.write(f"{key}: {value}\n")
+
+print(f"Results saved to {results_file}")
