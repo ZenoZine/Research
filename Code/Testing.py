@@ -44,7 +44,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 model = deeplabv3_resnet50(pretrained=False, progress=False).to(device)
+print(f"Loading model from {base_dir}/trained_models/{args.model_name}")
 model.load_state_dict(load(f'{base_dir}/trained_models/{args.model_name}', map_location=device))
+print("Model loaded successfully.")
 
 # Move metric to GPU
 metric = JaccardIndex(task="multiclass", num_classes=21, ignore_index=0).to(device)
@@ -69,11 +71,16 @@ for i, sample in enumerate(tbar):
         output = model(image)
 
     pred = argmax(output['out'], dim=1)
-    accuracy.append(metric(pred, target).cpu().numpy())
+
+    batch_per_class_iou = metric(pred, target).cpu().numpy()
+
+    accuracy.append(batch_per_class_iou)
 
     # Measure batch time
     batch_time = time.time() - batch_start
     tbar.set_description(f"Batch {i+1}/{total_batches} | Time per batch: {batch_time:.3f}s")
+
+accuracy = np.array(accuracy)
 
 # Final timing
 total_time = time.time() - start_time
@@ -84,9 +91,8 @@ print(f"\nTotal inference time: {total_time:.2f} seconds")
 print(f"Average time per batch: {avg_batch_time:.3f} seconds")
 
 # Compute final IoU scores
-IoUs = np.array(accuracy)
-Per_class_IoU = np.mean(IoUs, axis=0)
-miou = np.mean(Per_class_IoU, axis=0)
+Per_class_IoU = np.mean(accuracy, axis=0)
+miou = np.mean(Per_class_IoU)
 
 # Print results
 print("\nTest set results:")
