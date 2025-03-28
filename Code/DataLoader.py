@@ -150,7 +150,7 @@ optimizer = optim.SGD(model.parameters() , lr = 0.001 , momentum = 0.9)
 criterion = nn.CrossEntropyLoss(ignore_index = 255)
 
 #Looping
-max_epochs = 1
+max_epochs = 100
 
 for epoch in range(max_epochs):
   train_loss = 0.0
