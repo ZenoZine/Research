@@ -3,6 +3,27 @@ import torch
 from DataLoader import pascalVOCLoader
 from torch.utils.data import DataLoader
 
+import os
+import numpy as np
+import datetime
+
+# Compute class weights
+class_weights = compute_class_weights(dataloader)
+
+# Create the "weights" directory if it doesn't exist
+weights_dir = "weights"
+os.makedirs(weights_dir, exist_ok=True)
+
+# Generate a unique filename using the current date and time
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+file_path = os.path.join(weights_dir, f"class_weights_{timestamp}.npy")
+
+# Save the weights
+np.save(file_path, class_weights.numpy())
+
+print(f"Class weights saved to {file_path}")
+
+
 def compute_class_weights(dataloader, num_classes=21, batch_size=8):
     dataset = pascalVOCLoader(root, split="train")
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
