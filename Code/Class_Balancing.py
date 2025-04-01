@@ -41,7 +41,7 @@ def compute_class_weights(dataloader, num_classes=21, batch_size=8):
         unique, counts = np.unique(mask, return_counts=True)
         pixel_counts[unique] += counts  # Accumulate pixel counts
 
-    # Compute median frequency without zero check
+    # Compute median frequency
     median_frequency = np.median(pixel_counts)
 
     # Compute class weights
