@@ -1,32 +1,45 @@
 import argparse
 import os
+import scipy.misc
 import numpy as np
 import sys
+from tqdm import tqdm
 import torch
-from torchmetrics import JaccardIndex
-from torch import no_grad
-from torch import argmax
-from torch import load
+from torch.nn import BCEWithLogitsLoss
+from torch.utils.data import DataLoader
+from torchvision import models
 from torchvision.models.segmentation import deeplabv3_resnet50
+from torchmetrics import JaccardIndex
+from torch.utils.tensorboard import SummaryWriter
+from sklearn.metrics import confusion_matrix
+from torch import argmax
+from torch import nn
+from torch import optim
+from torchsummary import summary
+from torch import no_grad
+from torch import FloatTensor
+from torch import save
+from torch import load
+from torch import from_numpy
 import matplotlib.pyplot as plt
+import ssl
 import time
+
 from datetime import datetime
+
 from DataLoader import pascalVOCLoader
 
-# Argument parser
 parser = argparse.ArgumentParser(description="Test a trained DeepLabV3 model on Pascal VOC dataset.")
 parser.add_argument("--model-name", type=str, required=True, help="Path to the trained model .pt file")
 args = parser.parse_args()
 
-# Device setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Paths and data loading
 base_dir = "/home/josh_reed/Desktop/Reed_Project/Research/VOCdevkit/VOC2012"
 test_set = pascalVOCLoader(base_dir, 'val')
-test_loader = torch.utils.data.DataLoader(test_set, batch_size=4, shuffle=False, num_workers=2, pin_memory=True)
+test_loader = DataLoader(test_set, batch_size=4, shuffle=False, num_workers=2, pin_memory=True)
 
-# Load the model
+# Move model to GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
@@ -35,20 +48,19 @@ print(f"Loading model from {base_dir}/trained_models/{args.model_name}")
 model.load_state_dict(load(f'{base_dir}/trained_models/{args.model_name}', map_location=device))
 print("Model loaded successfully.")
 
-# Setup IoU metric
+# Move metric to GPU
 metric = JaccardIndex(task="multiclass", num_classes=21, ignore_index=0).to(device)
 
 # Set model to evaluation mode
 model.eval()
 
-# Initialize variables
 accuracy = []
 total_batches = len(test_loader)
 
 # Start timing
 start_time = time.time()
 
-# Testing loop
+# Testing loop with batch timing
 tbar = tqdm(test_loader, desc="Testing")
 for i, sample in enumerate(tbar):
     batch_start = time.time()  # Start batch timer
@@ -68,8 +80,9 @@ for i, sample in enumerate(tbar):
     batch_time = time.time() - batch_start
     tbar.set_description(f"Batch {i+1}/{total_batches} | Time per batch: {batch_time:.3f}s")
 
-# Final time calculation
 accuracy = np.array(accuracy)
+
+# Final timing
 total_time = time.time() - start_time
 avg_batch_time = total_time / total_batches
 
@@ -81,13 +94,13 @@ print(f"Average time per batch: {avg_batch_time:.3f} seconds")
 Per_class_IoU = np.mean(accuracy, axis=0)
 miou = np.mean(Per_class_IoU)
 
-# Print per-class and mean IoU
+# Print results
 print("\nTest set results:")
 print("Per-class IoU:", Per_class_IoU)
 print("Mean IoU:", miou)
 
-# Save the results to a text file
-results_dir = "test_results"
+# Save the results to a new file
+results_dir = "test results"
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
@@ -98,7 +111,7 @@ results = {
     "Average Time per Batch": avg_batch_time
 }
 
-# Set up the timestamps for the results file
+# Set up the timestamps
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 results_file = os.path.join(results_dir, f"results_{timestamp}.txt")
 
@@ -109,32 +122,3 @@ with open(results_file, "w") as f:
         f.write(f"{key}: {value}\n")
 
 print(f"Results saved to {results_file}")
-
-# Plotting the per-class IoU as a bar graph and saving it as an image
-classes = np.arange(0, 21)  # 21 classes in Pascal VOC dataset
-plt.figure(figsize=(10, 6))
-
-# Create the bar graph
-plt.bar(classes, Per_class_IoU, color='skyblue')
-
-# Labeling the axes and the title
-plt.xlabel('Class')
-plt.ylabel('IoU')
-plt.title('Per-class IoU for the model')
-
-# Set x-axis ticks to show class indices
-plt.xticks(classes)
-
-# Display grid for better visibility
-plt.grid(True, linestyle='--', alpha=0.6)
-
-# Make the layout tight so labels aren't cut off
-plt.tight_layout()
-
-# Save the plot as an image
-graph_filename = f'{base_dir}/trained_models/per_class_iou_{args.model_name}.png'
-plt.savefig(graph_filename)
-print(f"Graph saved to {graph_filename}")
-
-# Close the plot to avoid memory buildup
-plt.close()
