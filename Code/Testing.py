@@ -24,7 +24,9 @@ from torch import from_numpy
 import matplotlib.pyplot as plt
 import ssl
 import time
+
 from datetime import datetime
+
 from DataLoader import pascalVOCLoader
 
 parser = argparse.ArgumentParser(description="Test a trained DeepLabV3 model on Pascal VOC dataset.")
@@ -96,21 +98,6 @@ miou = np.mean(Per_class_IoU)
 print("\nTest set results:")
 print("Per-class IoU:", Per_class_IoU)
 print("Mean IoU:", miou)
-
-# Plot the per-class IoU results
-classes = np.arange(0, 21)  # 21 classes in Pascal VOC dataset
-plt.figure(figsize=(10, 6))
-plt.bar(classes, Per_class_IoU, color='skyblue')
-plt.xlabel('Class')
-plt.ylabel('IoU')
-plt.title('Per-class IoU for the model')
-plt.xticks(classes)
-plt.grid(True, linestyle='--', alpha=0.6)
-plt.tight_layout()
-
-# Save the plot
-plt.savefig(f'{base_dir}/trained_models/per_class_iou_{args.model_name}.png')
-plt.show()
 
 # Save the results to a new file
 results_dir = "test results"
