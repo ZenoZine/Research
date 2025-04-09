@@ -122,3 +122,16 @@ with open(results_file, "w") as f:
         f.write(f"{key}: {value}\n")
 
 print(f"Results saved to {results_file}")
+
+plt.figure(figsize=(10, 6))
+plt.bar(np.arange(21), Per_class_IoU, color='skyblue')
+plt.xlabel('Class')
+plt.ylabel('IoU')
+plt.title('Per-class IoU for the model')
+plt.xticks(np.arange(21))
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.tight_layout()
+
+# Save the plot to a file
+plt.savefig(f'{results_dir}/per_class_iou_{args.model_name}.png')
+print(f"Graph saved to {results_dir}/per_class_iou_{args.model_name}.png")
